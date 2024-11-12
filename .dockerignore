@@ -1,7 +1,8 @@
 *
-!pom.xml
 !src/main/resources/*
 !target/*-runner
 !target/*-runner.jar
 !target/lib/*
 !target/quarkus-app/*
+!src/
+!pom.xml
