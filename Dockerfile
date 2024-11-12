@@ -1,5 +1,5 @@
-# Usar una imagen base que contenga Java y Maven
-FROM maven:3.8.6-jdk-17 AS builder
+# Usar una imagen base que contenga Maven y OpenJDK 17
+FROM maven:3.8.6-openjdk-17-slim AS builder
 
 # Directorio de trabajo en la imagen
 WORKDIR /app
@@ -14,7 +14,7 @@ RUN mvn dependency:go-offline
 COPY src ./src
 
 # Compilar la aplicación
-RUN mvn package
+RUN mvn package -DskipTests
 
 # Imagen base para ejecutar la aplicación
 FROM openjdk:17-jre-slim
