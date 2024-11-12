@@ -30,6 +30,7 @@ public class RutaInicial extends RouteBuilder {
                 .setProperty("productId",simple("${headers.productId}"))
                 .setProperty("quantity",simple("${headers.quantity}"))
                 .to("sql:SELECT id, name, price, units FROM productos WHERE id = CAST(:#productId AS INTEGER)")
+                .log("hola")
                 .process(exchange -> {
                     ArrayList<LinkedCaseInsensitiveMap<String>> parametros = (ArrayList<LinkedCaseInsensitiveMap<String>>) exchange.getIn().getBody();
                     Integer parametro = Integer.valueOf(String.valueOf(parametros.get(0).get("units")));
