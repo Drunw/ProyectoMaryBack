@@ -1,5 +1,5 @@
 # Usar una imagen base que contenga Java y Maven
-FROM maven:3.6.3-jdk-17 AS builder
+FROM registry.access.redhat.com/ubi8/openjdk-17:1.16 AS builder
 
 # Directorio de trabajo en la imagen
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY src ./src
 RUN mvn package
 
 # Imagen base para ejecutar la aplicación
-FROM openjdk:17-jre-slim
+FROM  registry.access.redhat.com/ubi8/openjdk-17:1.16
 
 # Directorio de trabajo en la imagen
 WORKDIR /app
