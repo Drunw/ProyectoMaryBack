@@ -1,8 +1,8 @@
 # Usar una imagen base que contenga Java y Maven
 FROM registry.access.redhat.com/ubi8/openjdk-17:1.16 AS builder
-
+USER root
 # Directorio de trabajo en la imagen
-WORKDIR /tmp/app
+WORKDIR /app
 
 # Copiar el pom.xml para descargar dependencias
 COPY pom.xml .
@@ -10,7 +10,7 @@ COPY pom.xml .
 # Descargar dependencias
 RUN mvn dependency:go-offline
 
-RUN mkdir -p /tmp/app/target/classes
+RUN mkdir -p /app/target/classes
 
 # Copiar el resto del código fuente
 COPY src ./src
@@ -22,10 +22,10 @@ RUN mvn package -DskipTests
 FROM  registry.access.redhat.com/ubi8/openjdk-17:1.16
 
 # Directorio de trabajo en la imagen
-WORKDIR /tmp/app
+WORKDIR /app
 
 # Copiar el archivo JAR construido desde la etapa anterior
-COPY --from=builder /tmp/app/target/*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 # Puerto expuesto por la aplicación
 EXPOSE 8080
