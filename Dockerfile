@@ -5,8 +5,8 @@ FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-17 AS builder
 WORKDIR /work
 
 # Copiar los archivos de configuración de Maven
-COPY pom.xml ./
-COPY src ./src
+COPY ./pom.xml ./
+COPY ./src ./src
 
 # Realizar la compilación en modo nativo
 RUN mvn clean install -Pnative -Dquarkus.native.container-build=true -DskipTests
