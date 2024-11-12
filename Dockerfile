@@ -1,10 +1,19 @@
-FROM registry.access.redhat.com/ubi8/openjdk-17:1.13 AS build
-USER root
-WORKDIR /app
-COPY . .
-RUN mvn clean package -Dquarkus.package.type=uber-jar
+# Usamos una imagen base para Quarkus con OpenJDK
+FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:17-java17 as build
 
-FROM registry.access.redhat.com/ubi8/openjdk-17:1.13
-WORKDIR /app
-COPY --from=build /app/target/*-runner.jar /app/app.jar
-CMD ["java","-Dquarkus.http.port=8080" ,"-jar", "app.jar"]
+# Copiamos el proyecto y lo construimos
+COPY . /project
+WORKDIR /project
+RUN ./mvnw clean package -DskipTests
+
+# Imagen base para la ejecución
+FROM quay.io/quarkus/quarkus-distroless-image:1.0
+
+# Copiamos el archivo JAR desde la imagen de construcción
+COPY --from=build /project/target/*-runner.jar /application.jar
+
+# Exponemos el puerto para las peticiones
+EXPOSE 8080
+
+# Comando para ejecutar la aplicación
+CMD ["java", "-jar", "/application.jar"]
