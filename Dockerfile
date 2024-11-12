@@ -1,5 +1,5 @@
 # Usar una imagen base que contenga Java y Maven
-FROM maven:3.6.3-jdk-11 AS builder
+FROM maven:3.8.6-jdk-17 AS builder
 
 # Directorio de trabajo en la imagen
 WORKDIR /app
