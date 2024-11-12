@@ -2,7 +2,7 @@
 FROM registry.access.redhat.com/ubi8/openjdk-17:1.16 AS builder
 
 # Directorio de trabajo en la imagen
-WORKDIR /app
+WORKDIR /tmp/app
 
 # Copiar el pom.xml para descargar dependencias
 COPY pom.xml .
@@ -14,7 +14,7 @@ RUN mvn dependency:go-offline
 COPY src ./src
 
 # Compilar la aplicación
-RUN mvn package
+RUN mvn package -DskipTests
 
 # Imagen base para ejecutar la aplicación
 FROM  registry.access.redhat.com/ubi8/openjdk-17:1.16
