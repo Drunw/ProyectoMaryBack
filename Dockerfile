@@ -31,4 +31,4 @@ COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
 
 # Comando para ejecutar la aplicación al iniciar el contenedor
-CMD ["java", "-jar", "app.jar"]
+CMD ["java","-Dquarkus.http.port=8080" ,"-jar", "app.jar"]
