@@ -1,30 +1,32 @@
-# Usar la imagen de construcción UBI Quarkus con soporte para GraalVM y JDK 17
-FROM quay.io/quarkus/ubi-quarkus-mandrel-builder-image:jdk-17 AS builder
+# Usar una imagen base que contenga Java y Maven
+FROM maven:3.6.3-jdk-11 AS builder
 
-# Establecer el directorio de trabajo
-WORKDIR /work
+# Directorio de trabajo en la imagen
+WORKDIR /app
 
-# Copiar los archivos de configuración de Maven
-COPY ./pom.xml ./
-COPY ./src ./src
+# Copiar el pom.xml para descargar dependencias
+COPY pom.xml .
 
-# Realizar la compilación en modo nativo
-RUN mvn clean install -Pnative -Dquarkus.native.container-build=true -DskipTests
+# Descargar dependencias
+RUN mvn dependency:go-offline
 
-# Usar una imagen base de UBI minimal para la ejecución
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5
+# Copiar el resto del código fuente
+COPY src ./src
 
-# Establecer las variables de entorno para Quarkus
-ENV LANG='en_US.UTF-8' \
-    LANGUAGE='en_US:en' \
-    LC_ALL='en_US.UTF-8' \
-    QUARKUS_PROFILE=prod
+# Compilar la aplicación
+RUN mvn package
 
-# Copiar el ejecutable nativo desde la imagen de construcción
-COPY --from=builder /work/target/*-runner /application
+# Imagen base para ejecutar la aplicación
+FROM openjdk:17-jre-slim
 
-# Exponer el puerto que usará Cloud Run
+# Directorio de trabajo en la imagen
+WORKDIR /app
+
+# Copiar el archivo JAR construido desde la etapa anterior
+COPY --from=builder /app/target/*.jar app.jar
+
+# Puerto expuesto por la aplicación
 EXPOSE 8080
 
-# Configurar el comando de entrada
-CMD ["./application"]
+# Comando para ejecutar la aplicación al iniciar el contenedor
+CMD ["java", "-jar", "app.jar"]
