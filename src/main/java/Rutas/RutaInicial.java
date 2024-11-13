@@ -43,9 +43,18 @@ public class RutaInicial extends RouteBuilder {
                         price = 0.0;
                         exchange.getIn().setBody(new ProductAvailabilityResponse(name, price));
                     } else {
-                        exchange.getIn().setBody(new ProductAvailabilityResponse(name, price));
+                        exchange.setProperty("bodyFinal", new ProductAvailabilityResponse(name, price));
+                        Integer cantidadFinal = parametro - entrada;
+                        exchange.setProperty("conicion","1");
+                        exchange.setProperty("cantidadFinal",cantidadFinal);
                     }
                 })
+                .choice().when(simple("${exchangeProperty.conicion} == '1'"))
+                .log("${exchangeProperty.cantidadFinal}")
+                .setHeader("cantidad",simple("${exchangeProperty.cantidadFinal}"))
+                .toD("sql:UPDATE productos set units = CAST(:#cantidad AS INTEGER) WHERE id = CAST(:#productId AS INTEGER)")
+                .end()
+                .setBody(simple("${exchangeProperty.bodyFinal}"))
                 .end();
 
         from("direct:checkProducts").routeId("ObtenerTodos")
