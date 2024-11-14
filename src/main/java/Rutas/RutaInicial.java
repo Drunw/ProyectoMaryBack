@@ -42,7 +42,7 @@ public class RutaInicial extends RouteBuilder {
                     } else if (parametro < entrada) {
                         name = "no";
                         price = 0.0;
-                        exchange.getIn().setBody(new ProductAvailabilityResponse(name, price));
+                        exchange.setProperty("bodyFinal", new ProductAvailabilityResponse(name, price));
                     } else {
                         exchange.setProperty("bodyFinal", new ProductAvailabilityResponse(name, price));
                         Integer cantidadFinal = parametro - entrada;
