@@ -31,6 +31,13 @@ public class ConsumerRoute  extends RouteBuilder {
                 .apiDocs(true)
                 .to("direct:checkProducts");
 
+        rest("/api").id("devolverOrden")
+                .get("/ordenes")
+                .enableCORS(true)
+                .produces("application/json")
+                .apiDocs(true)
+                .to("direct:ordenDeCompra");
+      
         rest("/send-pdf")
                 .post()
                 .enableCORS(true)
