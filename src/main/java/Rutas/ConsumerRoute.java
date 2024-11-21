@@ -2,8 +2,11 @@ package Rutas;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
+
+import java.awt.*;
 
 @RegisterForReflection
 @ApplicationScoped
@@ -28,5 +31,13 @@ public class ConsumerRoute  extends RouteBuilder {
                 .apiDocs(true)
                 .to("direct:checkProducts");
 
+        rest("/send-pdf")
+                .post()
+                .enableCORS(true)
+                .consumes(MediaType.MULTIPART_FORM_DATA)
+                .to("direct:sendEmail");
+
+        from("timer://myTimer?period=30000")  // 30000 ms = 30 segundos
+                .log("Ejecutando tarea programada cada 30 segundos");
     }
 }
