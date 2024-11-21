@@ -90,8 +90,9 @@ public class RutaInicial extends RouteBuilder {
                 .process(exchange -> {
                     byte[] fileBytes = exchange.getIn().getBody(byte[].class); // Obtener el PDF como BLOB (byte[])
                     LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime adjustedTime = now.minusHours(5);
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                    String timestamp = now.format(formatter);  // Formatear la fecha y hora
+                    String timestamp = adjustedTime.format(formatter);  // Formatear la fecha y hora
                     String subject = "ORDEN DE COMPRA GENERADA - " + timestamp;
                     String to = "distribucionespremiumcial@gmail.com"; // Dirección de correo del destinatario
 
