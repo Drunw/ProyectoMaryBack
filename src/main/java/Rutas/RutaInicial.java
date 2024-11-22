@@ -73,6 +73,11 @@ public class RutaInicial extends RouteBuilder {
 
         from("direct:checkProducts").routeId("ObtenerTodos")
                 .to("sql:SELECT * FROM productos")
+                .log("ejecutado")
+                .end();
+
+        from("direct:checkClientes").routeId("ObtenerTodosClientes")
+                .to("sql:SELECT * FROM clientes")
                 .end();
       
         from("direct:ordenDeCompra").routeId("ordenDeCompra")
