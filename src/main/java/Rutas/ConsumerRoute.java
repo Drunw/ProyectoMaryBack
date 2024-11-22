@@ -52,7 +52,6 @@ public class ConsumerRoute  extends RouteBuilder {
                 .to("direct:sendEmail");
 
         from("timer://myTimer?period=30000")  // 30000 ms = 30 segundos
-                .log("Ejecutando tarea programada cada 30 segundos")
-                .to("direct:checkProducts");
+                .log("Ejecutando tarea programada cada 30 segundos");
     }
 }
