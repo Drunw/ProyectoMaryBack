@@ -102,12 +102,14 @@ public class RutaInicial extends RouteBuilder {
                     exchange.getIn().setHeader("Content-Type", "application/pdf"); // Tipo de contenido para el archivo adjunto
                 })
                 .to("smtp://smtp.gmail.com:587?username=distribucionespremiumcial@gmail.com&password=fkfa%20yjkz%20bbaq%20rreq&from=distribucionespremiumcial@gmail.com&to=distribucionespremiumcial@gmail.com&subject=Prueba1&mail.smtp.auth=true&mail.smtp.starttls.enable=true")
+                .setProperty("bodyResponse",simple("${body}"))
                 .to("direct:ordenDeCompra")
                 .process(exchange -> {
                     Integer numero = (Integer) exchange.getIn().getHeader("numero")+1;
                     exchange.getIn().setHeader("numero",numero);
                 })
-                .to("sql:UPDATE ordenescompra set numero = CAST(:#numero AS INTEGER) WHERE id = '1'");
+                .to("sql:UPDATE ordenescompra set numero = CAST(:#numero AS INTEGER) WHERE id = '1'")
+                .setBody(simple("${exchangeProperty.bodyResponse}"));
     }
 }
 
