@@ -61,12 +61,6 @@ public class RutaInicial extends RouteBuilder {
                 .choice().when(simple("${exchangeProperty.conicion} == '1'"))
                 .setHeader("cantidad",simple("${exchangeProperty.cantidadFinal}"))
                 .toD("sql:UPDATE productos set units = CAST(:#cantidad AS INTEGER) WHERE id = CAST(:#productId AS INTEGER)")
-                .to("direct:ordenDeCompra")
-                .process(exchange -> {
-                    Integer numero = (Integer) exchange.getIn().getHeader("numero")+1;
-                    exchange.getIn().setHeader("numero",numero);
-                })
-                .to("sql:UPDATE ordenescompra set numero = CAST(:#numero AS INTEGER) WHERE id = '1'")
                 .end()
                 .setBody(simple("${exchangeProperty.bodyFinal}"))
                 .end();
@@ -107,7 +101,13 @@ public class RutaInicial extends RouteBuilder {
                     exchange.getIn().setBody(fileBytes); // El archivo PDF en el cuerpo del correo
                     exchange.getIn().setHeader("Content-Type", "application/pdf"); // Tipo de contenido para el archivo adjunto
                 })
-                .to("smtp://smtp.gmail.com:587?username=distribucionespremiumcial@gmail.com&password=fkfa%20yjkz%20bbaq%20rreq&from=distribucionespremiumcial@gmail.com&to=distribucionespremiumcial@gmail.com&subject=Prueba1&mail.smtp.auth=true&mail.smtp.starttls.enable=true");
+                .to("smtp://smtp.gmail.com:587?username=distribucionespremiumcial@gmail.com&password=fkfa%20yjkz%20bbaq%20rreq&from=distribucionespremiumcial@gmail.com&to=distribucionespremiumcial@gmail.com&subject=Prueba1&mail.smtp.auth=true&mail.smtp.starttls.enable=true")
+                .to("direct:ordenDeCompra")
+                .process(exchange -> {
+                    Integer numero = (Integer) exchange.getIn().getHeader("numero")+1;
+                    exchange.getIn().setHeader("numero",numero);
+                })
+                .to("sql:UPDATE ordenescompra set numero = CAST(:#numero AS INTEGER) WHERE id = '1'");
     }
 }
 
