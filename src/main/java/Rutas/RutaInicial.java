@@ -121,6 +121,10 @@ public class RutaInicial extends RouteBuilder {
                 .setProperty("city",simple("${headers.city}"))
                 .to("sql: INSERT INTO clientes (name , phone ,idtype, idnumber, address, city) VALUES (:#customerName,:#customerPhone,:#idType, :#customeId, :#addres, :#city)")
                 .end();
+
+        from("direct:actualizarClientes").routeId("ActualizarClientes")
+                .to("sql: UPDATE clientes SET name = :#customerName , phone = :#customerPhone , idtype = :#idType , idnumber = :#customeId , address = :#addres , city = :#city WHERE id = CAST(:#id AS INTEGER)")
+                .end();
     }
 }
 

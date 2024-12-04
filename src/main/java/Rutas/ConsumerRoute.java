@@ -60,5 +60,12 @@ public class ConsumerRoute  extends RouteBuilder {
                 .produces("application/json")
                 .apiDocs(true)
                 .to("direct:agregarClientes");
+
+        rest("/api").id("actualizarCliente")
+                .get("/updateClient/{id}/{customerName}/{customerPhone}/{idType}/{customeId}/{addres}/{city}")
+                .enableCORS(true)
+                .produces("application/json")
+                .apiDocs(true)
+                .to("direct:actualizarClientes");
     }
 }
