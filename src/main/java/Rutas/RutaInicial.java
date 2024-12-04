@@ -110,6 +110,17 @@ public class RutaInicial extends RouteBuilder {
                 })
                 .to("sql:UPDATE ordenescompra set numero = CAST(:#numero AS INTEGER) WHERE id = '1'")
                 .setBody(simple("${exchangeProperty.bodyResponse}"));
+
+        from("direct:agregarClientes").routeId("AgregarClientes")
+                .log("Headers: ${headers}")
+                .setProperty("name",simple("${headers.customerName}"))
+                .setProperty("phone",simple("${headers.customerPhone}"))
+                .setProperty("idType",simple("${headers.idType}"))
+                .setProperty("customeId",simple("${headers.customeId}"))
+                .setProperty("addres",simple("${headers.addres}"))
+                .setProperty("city",simple("${headers.city}"))
+                .to("sql: INSERT INTO clientes (name , phone ,idtype, idnumber, address, city) VALUES (:#customerName,:#customerPhone,:#idType, :#customeId, :#addres, :#city)")
+                .end();
     }
 }
 
