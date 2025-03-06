@@ -51,9 +51,6 @@ public class ConsumerRoute  extends RouteBuilder {
                 .consumes(MediaType.MULTIPART_FORM_DATA)
                 .to("direct:sendEmail");
 
-        from("timer://myTimer?period=30000")  // 30000 ms = 30 segundos
-                .log("Ejecutando tarea programada cada 30 segundos");
-
         rest("/api").id("AgregarCliente")
                 .get("/addClient/{customerName}/{customerPhone}/{idType}/{customeId}/{addres}/{city}")
                 .enableCORS(true)
