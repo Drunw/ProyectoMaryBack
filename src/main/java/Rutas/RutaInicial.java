@@ -106,7 +106,7 @@ public class RutaInicial extends RouteBuilder {
                     exchange.getIn().setBody(fileBytes); // El archivo PDF en el cuerpo del correo
                     exchange.getIn().setHeader("Content-Type", "application/pdf"); // Tipo de contenido para el archivo adjunto
                 })
-                .to("smtp://smtp.gmail.com:587?username=distribucionespremiumcial@gmail.com&password=fkfa%20yjkz%20bbaq%20rreq&from=distribucionespremiumcial@gmail.com&to=distribucionespremiumcial@gmail.com&subject=Prueba1&mail.smtp.auth=true&mail.smtp.starttls.enable=true")
+                .to("smtp://smtp.gmail.com:587?username=distribucionespremiumcial@gmail.com&password=slkt%20iwgs%20iatt%20jucl&from=distribucionespremiumcial@gmail.com&to=distribucionespremiumcial@gmail.com&subject=Prueba1&mail.smtp.auth=true&mail.smtp.starttls.enable=true")
                 .setProperty("bodyResponse",simple("${body}"))
                 .to("direct:ordenDeCompra")
                 .process(exchange -> {
