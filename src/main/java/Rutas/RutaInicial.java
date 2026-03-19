@@ -152,7 +152,7 @@ public class RutaInicial extends RouteBuilder {
       .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
       .setHeader(Exchange.HTTP_METHOD, constant("POST"))
                 .log("Antes de enviar")
-                .toD("https://script.google.com/macros/s/AKfycbwZRcT_t1v3XTKqbYv1WCya8tYh1NO8rd1KMqBSPsGxRuAjftQmW_oj-RfoOryGXueUSg/exec?bridgeEndpoint=true&throwExceptionOnFailure=false&httpMethod=POST")
+                .toD("https://script.google.com/macros/s/AKfycbwZRcT_t1v3XTKqbYv1WCya8tYh1NO8rd1KMqBSPsGxRuAjftQmW_oj-RfoOryGXueUSg/exec?bridgeEndpoint=true&throwExceptionOnFailure=false&httpMethod=POST&followRedirects=true")
                 .setProperty("gasCode", header(Exchange.HTTP_RESPONSE_CODE))
                 .setProperty("gasLocation", header("Location"))
                 .choice()
