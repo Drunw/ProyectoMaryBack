@@ -49,6 +49,7 @@ public class ConsumerRoute  extends RouteBuilder {
                 .post()
                 .enableCORS(true)
                 .consumes(MediaType.MULTIPART_FORM_DATA)
+                .bindingMode(RestBindingMode.off)
                 .to("direct:sendEmail");
 
         rest("/api").id("AgregarCliente")
