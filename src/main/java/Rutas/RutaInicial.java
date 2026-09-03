@@ -41,6 +41,16 @@ public class RutaInicial extends RouteBuilder {
     @Override
     public void configure() throws Exception {
 
+        // El link de redirección de Apps Script (script.googleusercontent.com/macros/echo?...)
+        // es de un solo uso y de corta duración. Si expira o falla justo al hacer el GET
+        // final, reintentamos toda la secuencia (POST nuevo -> nuevo link) en vez de
+        // reintentar el mismo link ya inválido.
+        onException(org.apache.camel.http.base.HttpOperationFailedException.class)
+                .maximumRedeliveries(2)
+                .redeliveryDelay(1500)
+                .logExhausted(true)
+                .handled(false);
+
         from("direct:checkProductAvailability").routeId("Ruta inicial")
                 .setProperty("productId",simple("${headers.productId}"))
                 .setProperty("quantity",simple("${headers.quantity}"))
