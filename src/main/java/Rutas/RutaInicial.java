@@ -41,11 +41,10 @@ public class RutaInicial extends RouteBuilder {
     @Override
     public void configure() throws Exception {
 
-        // El link de redirección de Apps Script (script.googleusercontent.com/macros/echo?...)
-        // es de un solo uso y de corta duración. Si expira o falla justo al hacer el GET
-        // final, reintentamos toda la secuencia (POST nuevo -> nuevo link) en vez de
-        // reintentar el mismo link ya inválido.
-        onException(org.apache.camel.http.base.HttpOperationFailedException.class)
+        // La llamada a Apps Script (POST + redirecciones hasta el JSON final) es una sola
+        // operación atómica; si falla (red, timeout, statusCode fuera de 2xx) reintentamos
+        // TODA la secuencia, porque cada intento genera un link de redirección nuevo.
+        onException(java.io.IOException.class, org.apache.camel.http.base.HttpOperationFailedException.class)
                 .maximumRedeliveries(2)
                 .redeliveryDelay(1500)
                 .logExhausted(true)
@@ -157,24 +156,43 @@ public class RutaInicial extends RouteBuilder {
 
         exchange.getIn().setBody(payload);
       })
-      // 5) JSON + POST al Apps Script Web App
-      .marshal().json()
-      .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-      .setHeader(Exchange.HTTP_METHOD, constant("POST"))
-                .log("Antes de enviar")
-                .toD("https://script.google.com/macros/s/AKfycbwZRcT_t1v3XTKqbYv1WCya8tYh1NO8rd1KMqBSPsGxRuAjftQmW_oj-RfoOryGXueUSg/exec?bridgeEndpoint=true&throwExceptionOnFailure=false&httpMethod=POST&followRedirects=true")
-                .setProperty("gasCode", header(Exchange.HTTP_RESPONSE_CODE))
-                .setProperty("gasLocation", header("Location"))
-                .choice()
-                .when(exchangeProperty("gasCode").isEqualTo(302))
-                .log("en el get")
-                // Ir a la URL Location para ver el JSON final
-                .setHeader(Exchange.HTTP_METHOD, constant("GET"))
-                .removeHeader(Exchange.CONTENT_TYPE)
-                .toD("${exchangeProperty.gasLocation}&bridgeEndpoint=true&throwExceptionOnFailure=true")
-                .end()
+      // 5) POST al Apps Script Web App con java.net.http.HttpClient: Google responde con
+      //    un 302 hacia script.googleusercontent.com (otro dominio) y ahí, típicamente,
+      //    otro salto más antes del JSON final. camel-http (tras el upgrade a Camel 4)
+      //    dejó de seguir esa cadena de forma confiable, así que la resolvemos con un
+      //    cliente que sí sigue redirecciones (incluida la conversión POST->GET) en una
+      //    sola llamada atómica: si falla, el reintento de onException repite TODO
+      //    (POST + redirecciones), no un link ya muerto.
+      .log("Antes de enviar")
+      .process(exchange -> {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> payload = (Map<String, Object>) exchange.getIn().getBody();
 
-                .log("GAS final code=${header.CamelHttpResponseCode} body=${body}")
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        String jsonBody = mapper.writeValueAsString(payload);
+
+        java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
+                .followRedirects(java.net.http.HttpClient.Redirect.NORMAL)
+                .connectTimeout(java.time.Duration.ofSeconds(15))
+                .build();
+
+        java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("https://script.google.com/macros/s/AKfycbwZRcT_t1v3XTKqbYv1WCya8tYh1NO8rd1KMqBSPsGxRuAjftQmW_oj-RfoOryGXueUSg/exec"))
+                .timeout(java.time.Duration.ofSeconds(30))
+                .header("Content-Type", "application/json")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new java.io.IOException("GAS respondió con statusCode=" + response.statusCode() + " body=" + response.body());
+        }
+
+        exchange.setProperty("gasCode", response.statusCode());
+        exchange.getIn().setBody(response.body());
+      })
+      .log("GAS final code=${exchangeProperty.gasCode} body=${body}")
       .setProperty("bodyResponse", simple("${body}"))
       // 7) Tu flujo igual
       .to("direct:ordenDeCompra")
