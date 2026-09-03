@@ -194,8 +194,15 @@ public class RutaInicial extends RouteBuilder {
       })
       .log("GAS final code=${exchangeProperty.gasCode} body=${body}")
       .setProperty("bodyResponse", simple("${body}"))
-      // 7) Tu flujo igual
-      .to("direct:ordenDeCompra")
+      // 7) Tu flujo igual (consulta el número de orden en línea, sin saltar a
+      //    direct:ordenDeCompra: Camel fusiona esa ruta con la REST /api/ordenes
+      //    cuando solo tiene un consumidor, y deja de existir como endpoint aparte)
+      .to("sql:SELECT numero FROM ordenescompra WHERE id = '1'")
+      .process(exchange -> {
+        ArrayList<LinkedCaseInsensitiveMap<String>> parametros = (ArrayList<LinkedCaseInsensitiveMap<String>>) exchange.getIn().getBody();
+        Integer numero = Integer.valueOf(parametros.get(0).get("numero"));
+        exchange.getIn().setHeader("numero", numero);
+      })
       .process(exchange -> {
         Integer numero = (Integer) exchange.getIn().getHeader("numero") + 1;
         exchange.getIn().setHeader("numero", numero);
